@@ -4,5 +4,7 @@
     <string name="app_name">CardboardFlinger</string>
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
-
+    <string name="main_cardboard_prefs">CardboardPreferences</string>
+    <string name="cardboard_count">CardboardCount</string>
+      
 </resources>

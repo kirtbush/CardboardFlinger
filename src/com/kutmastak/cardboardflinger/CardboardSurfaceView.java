@@ -1,6 +1,9 @@
 package com.kutmastak.cardboardflinger;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -12,8 +15,11 @@ public class CardboardSurfaceView extends SurfaceView implements SurfaceHolder.C
 	public SurfaceHolder m_SurfaceHolder;
 	public Thread m_DrawingThread;
 	public SurfaceChangedRunnable m_drawingRunnable;
+	public Context m_context;
+	public int count;
 	public CardboardSurfaceView(Context context) {
 		super(context);
+		m_context = context;
 		// From the android guide: 
 		// First step is to get the holder
 		m_SurfaceHolder = getHolder();
@@ -57,8 +63,15 @@ public class CardboardSurfaceView extends SurfaceView implements SurfaceHolder.C
 			Paint paintBrush = new Paint();
 			paintBrush.setColor(Color.GREEN);
 			
-			//draw to the canvas
-			canvas.drawCircle(5, 5, 5, paintBrush);
+			//draw the number of people set in the activity
+			float start_left = 5, start_top = 5;
+			for (int iter = 0; iter < m_myView.count; iter++) {
+				Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_delete);
+				//draw to the canvas
+				canvas.drawBitmap(bmp, start_left, 5, paintBrush);
+				//canvas.drawCircle(5, 5, 5, paintBrush);
+				start_left += (bmp.getWidth() + 1); //draw the next one further to the right
+			}
 			
 			//now finish with the canvas
 			holder.unlockCanvasAndPost(canvas);
