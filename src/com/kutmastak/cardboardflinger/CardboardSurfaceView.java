@@ -1,5 +1,7 @@
 package com.kutmastak.cardboardflinger;
 
+import java.util.Random;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -13,29 +15,53 @@ import android.view.SurfaceView;
 
 public class CardboardSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
 	public SurfaceHolder m_SurfaceHolder;
-	public Thread m_DrawingThread;
+	public DrawThread m_DrawingThread;
 	public SurfaceChangedRunnable m_drawingRunnable;
 	public Context m_context;
 	public int count;
 	public CardboardSurfaceView(Context context) {
 		super(context);
 		m_context = context;
+		
 		// From the android guide: 
 		// First step is to get the holder
 		m_SurfaceHolder = getHolder();
 		// Add ourself to the callback for the SurfaceHolder
 		m_SurfaceHolder.addCallback(this);
-		m_drawingRunnable = new SurfaceChangedRunnable(this);
-		m_DrawingThread = new Thread(m_drawingRunnable);
-		
+		//m_drawingRunnable = new SurfaceChangedRunnable(this);
+		m_DrawingThread = new DrawThread(m_SurfaceHolder);
+		m_DrawingThread.setRunning(true);
+		m_DrawingThread.start();
 	}
 
+	@Override
+	protected 
+	void onDraw(Canvas canvas)
+	{
+		canvas.drawColor(Color.BLACK);
+		//Log.d("CardboardSurfaceView", "onDraw called!");
+		Paint paintBrush = new Paint();
+		paintBrush.setColor(Color.GREEN);
+		
+		//draw the number of people set in the activity
+		float start_left = 5, start_top = 5;
+		Random myRand = new Random();
+		for (int iter = 0; iter < this.count; iter++) {
+			canvas.getHeight();
+			Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.ic_action_delete);
+			//draw to the canvas
+			canvas.drawBitmap(bmp, myRand.nextInt(canvas.getWidth()), myRand.nextInt(canvas.getHeight()), paintBrush);
+			//canvas.drawCircle(5, 5, 5, paintBrush);
+			//start_left += (bmp.getWidth() + 1); //draw the next one further to the right
+		}	
+	}
+	
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
 		// TODO Auto-generated method stub
 		Log.d("CardboardSurfaceView", "surfaceChanged Called!");
-		m_DrawingThread.start();
+		//m_DrawingThread.start();
 	}
 
 	@Override
@@ -48,9 +74,11 @@ public class CardboardSurfaceView extends SurfaceView implements SurfaceHolder.C
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		// TODO Auto-generated method stub
 		Log.d("CardboardSurfaceView", "surfaceDestroyed Called!");
+		m_DrawingThread.setRunning(false);
 	}
-
+	
 	class SurfaceChangedRunnable implements Runnable {
+
 		public CardboardSurfaceView m_myView;
 		public SurfaceChangedRunnable(CardboardSurfaceView view) {
 			Log.d("SurfaceChangedRunnable", "Creating new SurfaceChangedRunnable");
@@ -77,5 +105,45 @@ public class CardboardSurfaceView extends SurfaceView implements SurfaceHolder.C
 			holder.unlockCanvasAndPost(canvas);
 		}
 	}
+
+	protected class DrawThread extends Thread {
+        private SurfaceHolder surfaceHolder;
+        private boolean isRunning;
+
+        public DrawThread(SurfaceHolder surfaceHolder) {
+            this.surfaceHolder = surfaceHolder;
+            isRunning = false;
+        }
+
+        public void setRunning(boolean run) {
+            isRunning = run;
+        }
+
+        public void run() {
+            Canvas c;
+            while (isRunning) {
+                c = null;
+                try {
+                    c = surfaceHolder.lockCanvas(null);
+                    synchronized (surfaceHolder) {
+                        onDraw(c);
+                    }
+                } finally {
+                    // do this in a finally so that if an exception is thrown
+                    // during the above, we don't leave the Surface in an
+                    // inconsistent state
+                    if (c != null) {
+                        surfaceHolder.unlockCanvasAndPost(c);
+                    }
+                }
+                try {
+					sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            }
+        }
+    }
 }
 
