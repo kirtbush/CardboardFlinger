@@ -22,7 +22,7 @@ public class CardboardFlingerActivity extends Activity {
 		int count = settings.getInt(getString(R.string.cardboard_count), 0);
 		Log.d("MainActivity", "Initial CardboardCount "+Integer.toString(count));
 		
-		myDrawingView = new CardboardSurfaceView(getBaseContext());
+		myDrawingView = new CardboardSurfaceView(getBaseContext(), count);
 		RelativeLayout myLayout = (RelativeLayout)findViewById(R.id.main_layout);
 		myLayout.addView(myDrawingView);
 	}
@@ -46,7 +46,7 @@ public class CardboardFlingerActivity extends Activity {
 				editor.putInt(getString(R.string.cardboard_count), ++count);
 				editor.commit();
 				Log.d("MenuItems", "Added the "+Integer.toString(count)+" Person!");
-				myDrawingView.count = count;
+				myDrawingView.myCount = count;
 				myDrawingView.invalidate();
 				return true;
 			default:
